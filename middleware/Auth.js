@@ -9,6 +9,8 @@ const isAuth = async (req, res, next) => {
         if (!fetchUser) {
             return res.send({ success: false, message: "Please login and Try again" })
         }
+        
+
         next()
     }
     catch (err) {

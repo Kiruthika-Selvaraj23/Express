@@ -7,12 +7,16 @@ const isAuth = require("../middleware/Auth")
 
 RegisterRouter.get("/getUsers", async (req, res) => {
     try {
-        const userData = await Register.find()
-        if (!userData) {
-            return res.send({ success: true, message: "There is no user enrolled get" })
+        const role = req.session.UserDetails.role
+        if (role === "admin") {
+            const userData = await Register.find()
+            if (!userData) {
+                return res.send({ success: true, message: "There is no user enrolled get" })
+            }
+            return res.send({ success: true, message: "User details fetched successfully", userDetails: userData })
         }
-        return res.send({ success: true, message: "User details fetched successfully", userDetails: userData })
-    }
+        return res.send({ success: false, message: "Access denied" })
+      }
     catch (err) {
         console.log("Error in getting users", err)
     }
@@ -20,7 +24,7 @@ RegisterRouter.get("/getUsers", async (req, res) => {
 
 RegisterRouter.post("/enroll", async (req, res) => {
     try {
-        const { userName, pwd, emailId, mobileNo } = req.body
+        const { userName, pwd, emailId, mobileNo, role , companyName} = req.body
         if (!userName || !pwd || !emailId || !mobileNo) {
             return res.send({ success: false, message: "All fields are require" })
         }
@@ -33,8 +37,13 @@ RegisterRouter.post("/enroll", async (req, res) => {
             name: userName,
             password: pwd,
             email: emailId,
-            contactNo: mobileNo
+            contactNo: mobileNo,
+            role: role,
         })
+
+        if (role === "seller") {
+            createrUser.companyName = companyName
+        }
 
         const newUser = await createrUser.save()
         if (!newUser) {
@@ -67,7 +76,8 @@ RegisterRouter.post("/login", async (req, res) => {
         req.session.UserDetails = {
             name: userData.name,
             emailId: userData.email,
-            contactNo: userData.contactNo
+            contactNo: userData.contactNo,
+            role: userData.role
         } 
         
         let transporter = nodemailer.createTransport({
@@ -133,18 +143,22 @@ RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
 
 RegisterRouter.delete("/deleteUser/:id", isAuth , async (req, res) => {
     try {
-        const id = req.params.id
-        if (!id) {
-            return res.send({ success: false, message: "Id is missing" })
-        }
+        const role = req.session.UserDetails.role
+        if (role === "admin") {
+            const id = req.params.id
+            if (!id) {
+                return res.send({ success: false, message: "Id is missing" })
+            }
 
-        const deleteUser = await Register.deleteOne({ personId: id })
-        if (deleteUser.deletedCount === 0) {
-            return res.send({ success: false, message: "User details is not deleted" })
-        }
+            const deleteUser = await Register.deleteOne({ personId: id })
+            if (deleteUser.deletedCount === 0) {
+                return res.send({ success: false, message: "User details is not deleted" })
+            }
 
-        return res.send({ success: true, message: "User details deleted successfully" })
-    }
+            return res.send({ success: true, message: "User details deleted successfully" })
+         }
+        return res.send({ success: false, message: "Access denied" })
+        }
     catch (err) {
         console.log("Error in deleting user", err)
     }

@@ -21,32 +21,37 @@ OrderRouter.get("/getOrders", Auth, async (req, res) => {
 
 OrderRouter.post("/order", Auth, async (req, res) => {
     try {
-        const { productId, productQuantity } = req.body
-        if (!productId || !productQuantity) {
-            return res.send({ success: false, message: "Product detail is mandatory" })
-        }
+        const role = req.session.UserDetails.role
+        if (role === "user") {
+            const { productId, productQuantity } = req.body
+            if (!productId || !productQuantity) {
+                return res.send({ success: false, message: "Product detail is mandatory" })
+            }
 
-        const product = await Product.findOne({ productId: productId })
-        if (!product || Number(product.quantity) < productQuantity) {
-            return res.send({ success: false, message: "The product is out of stock" })
-        }
+            const product = await Product.findOne({ productId: productId })
+            if (!product || Number(product.quantity) < productQuantity) {
+                return res.send({ success: false, message: "The product is out of stock" })
+            }
 
-        const lastOrderId = await Order.findOne({}).sort({ orderId: -1 })
-        const lastId = lastOrderId ? lastOrderId.orderId + 1 : 1
-        const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ""));
-        //parseFoat => converts string to num , //g => replace globally , ^ => matches all that is not listed for example: comma, string,etc.. 
+            const lastOrderId = await Order.findOne({}).sort({ orderId: -1 })
+            const lastId = lastOrderId ? lastOrderId.orderId + 1 : 1
+            const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ""));
+            //parseFoat => converts string to num , //g => replace globally , ^ => matches all that is not listed for example: comma, string,etc.. 
 
-        const createOrder = await Order({
-            orderId: lastId,
-            product: product._id,
-            totalQuantity: productQuantity,
-            totalPrice: priceNum * productQuantity
-        })
-        const newOrder = await createOrder.save()
-        if (!newOrder) {
-            return res.send({ success: false, message: "Order is not placed, Try again!!" })
+            const createOrder = await Order({
+                orderId: lastId,
+                product: product._id,
+                totalQuantity: productQuantity,
+                totalPrice: priceNum * productQuantity
+            })
+            const newOrder = await createOrder.save()
+            if (!newOrder) {
+                return res.send({ success: false, message: "Order is not placed, Try again!!" })
+            }
+            return res.send({ success: true, message: "Order places successfully!!" })
         }
-        return res.send({ success: true, message: "Order places successfully!!" })
+        
+        return res.send({ success: false, message: "Access denied" })
 
     }
     catch (err) {
@@ -56,35 +61,40 @@ OrderRouter.post("/order", Auth, async (req, res) => {
 
 OrderRouter.put("/updateOrder/:id", Auth, async (req, res) => {
     try {
-        const id = req.params.id
-        if (!id) {
-            return res.send({ success: false, message: "Id is missing" })
-        }
-
-        const { productId, productQuantity } = req.body
-        if (!productId || !productQuantity) {
-            return res.send({ success: false, message: "Product detail is mandatory" })
-        }
-
-        const product = await Product.findOne({ productId: productId })
-        if (!product || Number(product.quantity) < productQuantity) {
-            return res.send({ success: false, message: "The product is out of stock" })
-        }
-
-        const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ""));
-        const updateOrder = await Order.updateOne({ orderId: id }, {
-            $set: {
-                product: product._id,
-                totalQuantity: productQuantity,
-                totalPrice: priceNum * productQuantity
+        const role = req.session.UserDetails.role
+        if (role === "admin") {
+            const id = req.params.id
+            if (!id) {
+                return res.send({ success: false, message: "Id is missing" })
             }
-        })
 
-        if (updateOrder.modifiedCount === 0) {
-            return res.send({ success: false, message: "There is no update in the order" })
+            const { productId, productQuantity } = req.body
+            if (!productId || !productQuantity) {
+                return res.send({ success: false, message: "Product detail is mandatory" })
+            }
+
+            const product = await Product.findOne({ productId: productId })
+            if (!product || Number(product.quantity) < productQuantity) {
+                return res.send({ success: false, message: "The product is out of stock" })
+            }
+
+            const priceNum = parseFloat(product.price.replace(/[^0-9.]/g, ""));
+            const updateOrder = await Order.updateOne({ orderId: id }, {
+                $set: {
+                    product: product._id,
+                    totalQuantity: productQuantity,
+                    totalPrice: priceNum * productQuantity
+                }
+            })
+
+            if (updateOrder.modifiedCount === 0) {
+                return res.send({ success: false, message: "There is no update in the order" })
+            }
+            return res.send({ success: true, message: "Order updated Successfully" })
         }
-        return res.send({ success: true, message: "Order updated Successfully" })
-    }
+
+        return res.send({ success: false, message: "Access denied" })
+        }
     catch (err) {
         console.log("Error in updating order", err)
     }
@@ -92,17 +102,22 @@ OrderRouter.put("/updateOrder/:id", Auth, async (req, res) => {
 
 OrderRouter.delete("/deleteOrder/:id", Auth , async (req, res) => {
     try {
-        const id = req.params.id
-        if (!id) {
-            return res.send({ success: false, message: "Id is missing" })
+        const role = req.session.UserDetails.role
+        if (role === "admin") {
+            const id = req.params.id
+            if (!id) {
+                return res.send({ success: false, message: "Id is missing" })
+            }
+
+            const deleteOrder = await Order.deleteOne({ orderId: id })
+            if (deleteOrder.deletedCount === 0) {
+                return res.send({ success: false, message: "Order is not deleted, try again" })
+            }
+            return res.send({ success: true, message: "Order cancelled successfully!!" })
         }
 
-        const deleteOrder = await Order.deleteOne({ orderId: id })
-        if (deleteOrder.deletedCount === 0) {
-            return res.send({ success: false, message: "Order is not deleted, try again" })
+        return res.send({ success: false, message: "Access denied" })
         }
-        return res.send({ success: true, message: "Order cancelled successfully!!" })
-    }
     catch (err) {
         console.log("Error in deleting order", err)
     }
