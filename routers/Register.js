@@ -16,7 +16,7 @@ RegisterRouter.get("/getUsers", async (req, res) => {
             return res.send({ success: true, message: "User details fetched successfully", userDetails: userData })
         }
         return res.send({ success: false, message: "Access denied" })
-      }
+    }
     catch (err) {
         console.log("Error in getting users", err)
     }
@@ -24,7 +24,7 @@ RegisterRouter.get("/getUsers", async (req, res) => {
 
 RegisterRouter.post("/enroll", async (req, res) => {
     try {
-        const { userName, pwd, emailId, mobileNo, role , companyName} = req.body
+        const { userName, pwd, emailId, mobileNo, role, companyName } = req.body
         if (!userName || !pwd || !emailId || !mobileNo) {
             return res.send({ success: false, message: "All fields are require" })
         }
@@ -61,16 +61,16 @@ RegisterRouter.post("/login", async (req, res) => {
     try {
         const { userMailId, pwd } = req.body
         if (!userMailId || !pwd) {
-            return res.send({success: false, message: "All fields are required"})
+            return res.send({ success: false, message: "All fields are required" })
         }
 
-        const userData = await Register.findOne({ email: userMailId }) 
+        const userData = await Register.findOne({ email: userMailId })
         if (!userData) {
-            return res.send({ success: false, message: "Please Register and Login or Invalid Email"})
+            return res.send({ success: false, message: "Please Register and Login or Invalid Email" })
         }
 
         if (userData.password !== pwd) {
-            return res.send({ success: false, message: "Incorrect Password"})
+            return res.send({ success: false, message: "Incorrect Password" })
         }
 
         req.session.UserDetails = {
@@ -78,8 +78,8 @@ RegisterRouter.post("/login", async (req, res) => {
             emailId: userData.email,
             contactNo: userData.contactNo,
             role: userData.role
-        } 
-        
+        }
+
         let transporter = nodemailer.createTransport({
             service: 'gmail', // e.g., Gmail
             auth: {
@@ -104,12 +104,13 @@ RegisterRouter.post("/login", async (req, res) => {
             console.log('Email sent:', info.response);
         });
 
-        return res.send({ success: true, message: "Login Successfull", UserData : userData })
+        return res.send({ success: true, message: "Login Successfull", UserData: req.session.UserDetails })
     }
     catch (err) {
         console.log("Error in Login", err)
     }
 })
+
 
 RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
     try {
@@ -141,7 +142,7 @@ RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
     }
 })
 
-RegisterRouter.delete("/deleteUser/:id", isAuth , async (req, res) => {
+RegisterRouter.delete("/deleteUser/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -156,9 +157,9 @@ RegisterRouter.delete("/deleteUser/:id", isAuth , async (req, res) => {
             }
 
             return res.send({ success: true, message: "User details deleted successfully" })
-         }
-        return res.send({ success: false, message: "Access denied" })
         }
+        return res.send({ success: false, message: "Access denied" })
+    }
     catch (err) {
         console.log("Error in deleting user", err)
     }
@@ -167,17 +168,17 @@ RegisterRouter.delete("/deleteUser/:id", isAuth , async (req, res) => {
 RegisterRouter.delete("/logout", isAuth, async (req, res) => {
     try {
         if (!req.session.UserDetails) {
-            return res.send({success: false, message: "Login and Try again"})
-        } 
+            return res.send({ success: false, message: "Login and Try again" })
+        }
 
         req.session.destroy(err => {
             if (err) {
                 console.log("Error in destroying Session", err)
-                return res.send({success: false, message: "Trouble in Logout, Try again"})
+                return res.send({ success: false, message: "Trouble in Logout, Try again" })
             }
-            return res.send({success: true, message: "Logout Successfully"})
+            return res.send({ success: true, message: "Logout Successfully" })
         })
-    } 
+    }
     catch (err) {
         console.log("Error in Logout", err)
     }

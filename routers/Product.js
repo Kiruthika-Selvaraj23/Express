@@ -21,8 +21,8 @@ ProductRouter.post("/product", isAuth , async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller"){
-            const { productName, productPrice, productDesc, productQuantity } = req.body
-            if (!productName || !productPrice || !productDesc || !productQuantity) {
+            const { sellerCompanyName, brandName ,productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
+            if (!sellerCompanyName || !brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount) {
                 return res.send({ success: false, message: "All fields are require" })
             }
 
@@ -31,10 +31,14 @@ ProductRouter.post("/product", isAuth , async (req, res) => {
 
             const createProduct = await Product({
                 productId: lastId,
+                sellerCompanyName: sellerCompanyName,
+                brandName: brandName,
                 name: productName,
-                price: productPrice,
+                originalPrice: productOriginalPrice,
+                price: currentPrice,
                 desc: productDesc,
-                quantity: productQuantity
+                quantity: productQuantity,
+                discount: discount
             })
             const newProduct = await createProduct.save()
             if (!newProduct) {
