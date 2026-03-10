@@ -2,7 +2,30 @@ const express = require("express")
 const Product = require("../models/Product")
 const ProductRouter = express.Router()
 
+const multer = require("multer")
+const path = require("path")
+const fs = require("fs")
+
 const isAuth = require("../middleware/Auth")
+
+const upload = "upload"
+if (!fs.existsSync(upload)) {
+    fs.mkdirSync(upload)
+}
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, upload)
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
+    }
+})
+
+const uploadFile = multer({
+    storage: storage,
+    limits: 5*1024*1024
+})
 
 ProductRouter.get("/getProducts", async (req, res) => {
     try {
@@ -17,17 +40,27 @@ ProductRouter.get("/getProducts", async (req, res) => {
     }
 })
 
-ProductRouter.post("/product", isAuth , async (req, res) => {
+ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller"){
-            const { sellerCompanyName, brandName ,productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
+            const { sellerCompanyName, brandName, productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
+            const imagePath = req.file
+
             if (!sellerCompanyName || !brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount) {
                 return res.send({ success: false, message: "All fields are require" })
             }
 
             const lastProductId = await Product.findOne({}).sort({ productId: -1 })
             const lastId = lastProductId ? lastProductId.productId + 1 : 1
+
+            let imageFile;
+            if (imagePath) {
+                imageFile = {
+                    fileName: imagePath.fieldname,
+                    filePath: imagePath.path.replace( /\\/g ,"/")
+                }
+            }
 
             const createProduct = await Product({
                 productId: lastId,
@@ -38,7 +71,8 @@ ProductRouter.post("/product", isAuth , async (req, res) => {
                 price: currentPrice,
                 desc: productDesc,
                 quantity: productQuantity,
-                discount: discount
+                discount: discount,
+                image: imageFile
             })
             const newProduct = await createProduct.save()
             if (!newProduct) {

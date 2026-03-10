@@ -15,6 +15,9 @@ console.log("app is running")
 
 app.use(express.json())
 
+app.use(express.urlencoded({ extended: true }))
+app.use("uplodad", express.static("upload"))
+
 mongoose.connect(process.env.MongoDb)
     .then(() => console.log("MongoDb connected successfully"))
     .catch((err) => console.log("Err in connecting MongoDb", err))

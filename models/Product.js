@@ -9,7 +9,11 @@ const ProductSchema = mongoose.Schema({
     originalPrice: {type: String, required: true},
     desc: { type: String, required: true},
     quantity: { type: String, required: true },
-    discount: {type: Number, required: true}
+    discount: { type: Number, required: true },
+    image: {
+        fileName: { type: String },
+        filePath: {type: String}
+    }
 })
 
 const Product = mongoose.model("Product", ProductSchema)
