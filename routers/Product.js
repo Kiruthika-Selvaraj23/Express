@@ -47,7 +47,7 @@ ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req
             const { sellerCompanyName, brandName, productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
             const imagePath = req.file
 
-            if (!sellerCompanyName || !brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount) {
+            if (!sellerCompanyName || !brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount || !imagePath) {
                 return res.send({ success: false, message: "All fields are require" })
             }
 
@@ -87,7 +87,7 @@ ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req
     }
 })
 
-ProductRouter.put("/updateProduct/:id", isAuth, async (req, res) => {
+ProductRouter.put("/updateProduct/:id", isAuth, uploadFile.single("product"),async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller") {
@@ -96,8 +96,18 @@ ProductRouter.put("/updateProduct/:id", isAuth, async (req, res) => {
                 return res.send({ success: false, message: "Id is missing" })
             }
             const { productName, productPrice, productDesc, productQuantity } = req.body
-            if (!productName || !productPrice || !productDesc || !productQuantity) {
+            const imagePath = req.file
+
+            if (!productName || !productPrice || !productDesc || !productQuantity || !imagePath) {
                 return res.send({ success: false, message: "All fields are require" })
+            }
+
+            let imageFile;
+            if (imagePath) {
+                imageFile = {
+                    fileName: imagePath.fieldname,
+                    filePath: imagePath.path.replace(/\\/g, "/")
+                }
             }
 
             const updateProduct = await Product.updateOne({ productId: id }, {
@@ -105,7 +115,8 @@ ProductRouter.put("/updateProduct/:id", isAuth, async (req, res) => {
                     name: productName,
                     price: productPrice,
                     desc: productDesc,
-                    quantity: productQuantity
+                    quantity: productQuantity,
+                    image: imageFile
                 }
             })
             if (updateProduct.modifiedCount === 0) {
