@@ -80,6 +80,10 @@ RegisterRouter.post("/login", async (req, res) => {
             role: userData.role
         }
 
+        if (userData.role === "seller") {
+            req.session.UserDetails.companyName = userData.companyName
+        }
+
         let transporter = nodemailer.createTransport({
             service: 'gmail', // e.g., Gmail
             auth: {

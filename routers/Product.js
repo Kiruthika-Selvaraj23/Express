@@ -31,12 +31,29 @@ ProductRouter.get("/getProducts", async (req, res) => {
     try {
         const productsData = await Product.find()
         if (!productsData) {
-            return res.send({ success: true, message: "There is no user enrolled get" })
+            return res.send({ success: true, message: "There is no products" })
         }
-        return res.send({ success: true, message: "User details fetched successfully", productDetails: productsData })
+        return res.send({ success: true, message: "Products Data fetched successfully", productDetails: productsData })
     }
     catch (err) {
         console.log("Error in getting products", err)
+    }
+})
+
+ProductRouter.get("/getProductDetails/:id", async (req, res) => {
+    try {
+        const id = req.params.id
+        if (!id) {
+            return res.send({success: false, message: "Id is missing"})
+        }
+        const productDetails = await Product.find({ productId: id })
+        if (!productDetails) {
+            return res.send({ success: false, message: "There is no Product" })
+        }
+        return res.send({ success: true, message: "Product details fetched successfully", detailedProduct: productDetails })
+    }
+    catch (err) {
+        console.log("Error in getting particular product details", err)
     }
 })
 
