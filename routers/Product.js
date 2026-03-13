@@ -46,7 +46,7 @@ ProductRouter.get("/getProductDetails/:id", async (req, res) => {
         if (!id) {
             return res.send({success: false, message: "Id is missing"})
         }
-        const productDetails = await Product.find({ productId: id })
+        const productDetails = await Product.findOne({ productId: id })
         if (!productDetails) {
             return res.send({ success: false, message: "There is no Product" })
         }
@@ -57,14 +57,36 @@ ProductRouter.get("/getProductDetails/:id", async (req, res) => {
     }
 })
 
+ProductRouter.get("/getCompanyProducts", isAuth, async (req, res) => {
+    try {
+        const companyName = req.session.UserDetails.companyName
+        if (!companyName) {
+            return res.send({success: false, message: "Company name is missing"})
+        }
+        const companyProducts = await Product.find({ sellerCompanyName: companyName })
+        if (!companyProducts) {
+            return res.send({success: false, message: "There is no company Products"})
+        }
+        return res.send({success: true, message: "Company products fetched successsfully", companyProducts: companyProducts})
+    }
+    catch (err) {
+        console.log("Error in getting particular company products", err)
+    }
+})
+
 ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller"){
-            const { sellerCompanyName, brandName, productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
+            const {brandName, productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
             const imagePath = req.file
 
-            if (!sellerCompanyName || !brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount || !imagePath) {
+            const sellerCompanyName = req.session.UserDetails.companyName
+            if (!sellerCompanyName) {
+                return res.send({ success: false, message: "Company name is missing" })
+            }
+
+            if (!brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount || !imagePath) {
                 return res.send({ success: false, message: "All fields are require" })
             }
 
@@ -112,10 +134,10 @@ ProductRouter.put("/updateProduct/:id", isAuth, uploadFile.single("product"),asy
             if (!id) {
                 return res.send({ success: false, message: "Id is missing" })
             }
-            const { productName, productPrice, productDesc, productQuantity } = req.body
+            const { brandName, productName, productOriginalPrice, currentPrice, productDesc, productQuantity, discount } = req.body
             const imagePath = req.file
 
-            if (!productName || !productPrice || !productDesc || !productQuantity || !imagePath) {
+            if (!brandName || !productName || !productOriginalPrice || !currentPrice || !productDesc || !productQuantity || !discount || !imagePath) {
                 return res.send({ success: false, message: "All fields are require" })
             }
 
@@ -129,9 +151,12 @@ ProductRouter.put("/updateProduct/:id", isAuth, uploadFile.single("product"),asy
 
             const updateProduct = await Product.updateOne({ productId: id }, {
                 $set: {
+                    brandName: brandName,
                     name: productName,
-                    price: productPrice,
+                    price: currentPrice,
+                    originalPrice: productOriginalPrice,
                     desc: productDesc,
+                    discount: discount,
                     quantity: productQuantity,
                     image: imageFile
                 }

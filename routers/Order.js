@@ -3,9 +3,9 @@ const Order = require("../models/Orders")
 const Product = require("../models/Product")
 const OrderRouter = express.Router()
 
-const Auth = require("../middleware/Auth")
+const isAuth = require("../middleware/Auth")
 
-OrderRouter.get("/getOrders", Auth, async (req, res) => {
+OrderRouter.get("/getOrders", isAuth, async (req, res) => {
     try {
         const orderData = await Order.find().populate("product")
         if (!orderData) {
@@ -19,7 +19,7 @@ OrderRouter.get("/getOrders", Auth, async (req, res) => {
 })
 
 
-OrderRouter.post("/order", Auth, async (req, res) => {
+OrderRouter.post("/order", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "user") {
@@ -59,7 +59,7 @@ OrderRouter.post("/order", Auth, async (req, res) => {
     }
 })
 
-OrderRouter.put("/updateOrder/:id", Auth, async (req, res) => {
+OrderRouter.put("/updateOrder/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -100,7 +100,7 @@ OrderRouter.put("/updateOrder/:id", Auth, async (req, res) => {
     }
 })
 
-OrderRouter.delete("/deleteOrder/:id", Auth , async (req, res) => {
+OrderRouter.delete("/deleteOrder/:id", isAuth , async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
