@@ -2,6 +2,7 @@ const mongoose = require("mongoose")
 
 const OrderSchema = mongoose.Schema({
     orderId: { type: Number, required: true },
+    userEmailId: {type: String, required: true},
     product: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
@@ -9,7 +10,7 @@ const OrderSchema = mongoose.Schema({
     },
     totalPrice: { type: Number, required: true },
     totalQuantity: {type: Number, required: true }
-})
+}, {timestamps: true})
 
 const Order = mongoose.model("Order", OrderSchema)
 

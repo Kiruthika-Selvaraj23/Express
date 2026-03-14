@@ -9,12 +9,29 @@ OrderRouter.get("/getOrders", isAuth, async (req, res) => {
     try {
         const orderData = await Order.find().populate("product")
         if (!orderData) {
-            return res.send({ success: true, message: "There is no user enrolled get" })
+            return res.send({ success: true, message: "There is no orders yet" })
         }
-        return res.send({ success: true, message: "User details fetched successfully", orderDetails: orderData })
+        return res.send({ success: true, message: "Orders details fetched successfully", orderDetails: orderData })
     }
     catch (err) {
-        console.log("Error in getting users", err)
+        console.log("Error in getting orders", err)
+    }
+})
+
+OrderRouter.get("/getParticularUserOrder",isAuth, async (req, res) => {
+    try {
+        const emailId = req.session.UserDetails.emailId
+        if (!emailId) {
+            return res.send({success: false, message: "Email Id is missing"})
+        }
+        const getOrders = await Order.find({ userEmailId: emailId }).populate("product")
+        if (!getOrders) {
+            return res.send({ success: false, message: "There is no orders yet!"})
+        }
+        return res.send({success: true, message: "Orders fetched successfully", orderedProducts: getOrders})
+    }
+    catch (err) {
+        console.log("Error in getting particular user orders", err)
     }
 })
 
@@ -26,6 +43,11 @@ OrderRouter.post("/order", isAuth, async (req, res) => {
             const { productId, productQuantity } = req.body
             if (!productId || !productQuantity) {
                 return res.send({ success: false, message: "Product detail is mandatory" })
+            }
+
+            const emailId = req.session.UserDetails.emailId
+            if (!emailId) {
+                return res.send({ success: false, message: "Email Id is missing" })
             }
 
             const product = await Product.findOne({ productId: productId })
@@ -40,6 +62,7 @@ OrderRouter.post("/order", isAuth, async (req, res) => {
 
             const createOrder = await Order({
                 orderId: lastId,
+                userEmailId: emailId,
                 product: product._id,
                 totalQuantity: productQuantity,
                 totalPrice: priceNum * productQuantity
@@ -48,7 +71,7 @@ OrderRouter.post("/order", isAuth, async (req, res) => {
             if (!newOrder) {
                 return res.send({ success: false, message: "Order is not placed, Try again!!" })
             }
-            return res.send({ success: true, message: "Order places successfully!!" })
+            return res.send({ success: true, message: "Congrats, Your order is placed successfully!!" })
         }
         
         return res.send({ success: false, message: "Access denied" })
