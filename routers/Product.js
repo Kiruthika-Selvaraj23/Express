@@ -59,15 +59,19 @@ ProductRouter.get("/getProductDetails/:id", async (req, res) => {
 
 ProductRouter.get("/getCompanyProducts", isAuth, async (req, res) => {
     try {
-        const companyName = req.session.UserDetails.companyName
-        if (!companyName) {
-            return res.send({success: false, message: "Company name is missing"})
+        const role = req.session.UserDetails.role 
+        if (role === "admin" || role === "seller") {
+            const companyName = req.session.UserDetails.companyName
+            if (!companyName) {
+                return res.send({ success: false, message: "Company name is missing" })
+            }
+            const companyProducts = await Product.find({ sellerCompanyName: companyName })
+            if (!companyProducts) {
+                return res.send({ success: false, message: "There is no company Products" })
+            }
+            return res.send({ success: true, message: "Company products fetched successsfully", companyProducts: companyProducts })
         }
-        const companyProducts = await Product.find({ sellerCompanyName: companyName })
-        if (!companyProducts) {
-            return res.send({success: false, message: "There is no company Products"})
-        }
-        return res.send({success: true, message: "Company products fetched successsfully", companyProducts: companyProducts})
+       return res.send({success: false, message: "Access denied"} )
     }
     catch (err) {
         console.log("Error in getting particular company products", err)

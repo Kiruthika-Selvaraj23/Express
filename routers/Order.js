@@ -9,7 +9,7 @@ OrderRouter.get("/getOrders", isAuth, async (req, res) => {
     try {
         const orderData = await Order.find().populate("product")
         if (!orderData) {
-            return res.send({ success: true, message: "There is no orders yet" })
+            return res.send({ success: false, message: "There is no orders yet" })
         }
         return res.send({ success: true, message: "Orders details fetched successfully", orderDetails: orderData })
     }
@@ -18,17 +18,39 @@ OrderRouter.get("/getOrders", isAuth, async (req, res) => {
     }
 })
 
-OrderRouter.get("/getParticularUserOrder",isAuth, async (req, res) => {
+OrderRouter.get("/getParticularCompanyOrders", isAuth, async (req, res) => {
+    try {
+        const companyName = req.session.UserDetails.companyName
+        if (!companyName) {
+            return res.send({ success: false, message: "Company name is missing" })
+        }
+        // const orderData = await Order.find().populate({ path: "product", match: { sellerCompanyName: companyName } })
+        // const filterOrder = orderData.filter(order => order.product !== null)
+        const orderData = await Order.find().populate("product")
+        const filterOrder = orderData.filter(order => order.product.sellerCompanyName === companyName )
+
+        if (!orderData) {
+            return res.send({ success: false, message: "There is no orders yet" })
+        }
+        return res.send({ success: true, message: "Company order details fetched successfully", orderDetails: filterOrder })
+
+    }
+    catch (err) {
+        console.log("Error in getting particular company orders", err)
+    }
+})
+
+OrderRouter.get("/getParticularUserOrder", isAuth, async (req, res) => {
     try {
         const emailId = req.session.UserDetails.emailId
         if (!emailId) {
-            return res.send({success: false, message: "Email Id is missing"})
+            return res.send({ success: false, message: "Email Id is missing" })
         }
         const getOrders = await Order.find({ userEmailId: emailId }).populate("product")
         if (!getOrders) {
-            return res.send({ success: false, message: "There is no orders yet!"})
+            return res.send({ success: false, message: "There is no orders yet!" })
         }
-        return res.send({success: true, message: "Orders fetched successfully", orderedProducts: getOrders})
+        return res.send({ success: true, message: "Orders fetched successfully", orderedProducts: getOrders })
     }
     catch (err) {
         console.log("Error in getting particular user orders", err)
@@ -73,7 +95,7 @@ OrderRouter.post("/order", isAuth, async (req, res) => {
             }
             return res.send({ success: true, message: "Congrats, Your order is placed successfully!!" })
         }
-        
+
         return res.send({ success: false, message: "Access denied" })
 
     }
@@ -117,13 +139,13 @@ OrderRouter.put("/updateOrder/:id", isAuth, async (req, res) => {
         }
 
         return res.send({ success: false, message: "Access denied" })
-        }
+    }
     catch (err) {
         console.log("Error in updating order", err)
     }
 })
 
-OrderRouter.delete("/deleteOrder/:id", isAuth , async (req, res) => {
+OrderRouter.delete("/deleteOrder/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -140,10 +162,10 @@ OrderRouter.delete("/deleteOrder/:id", isAuth , async (req, res) => {
         }
 
         return res.send({ success: false, message: "Access denied" })
-        }
+    }
     catch (err) {
         console.log("Error in deleting order", err)
     }
 })
 
-module.exports= OrderRouter
+module.exports = OrderRouter
