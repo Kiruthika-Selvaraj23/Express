@@ -20,20 +20,24 @@ OrderRouter.get("/getOrders", isAuth, async (req, res) => {
 
 OrderRouter.get("/getParticularCompanyOrders", isAuth, async (req, res) => {
     try {
-        const companyName = req.session.UserDetails.companyName
-        if (!companyName) {
-            return res.send({ success: false, message: "Company name is missing" })
-        }
-        // const orderData = await Order.find().populate({ path: "product", match: { sellerCompanyName: companyName } })
-        // const filterOrder = orderData.filter(order => order.product !== null)
-        const orderData = await Order.find().populate("product")
-        const filterOrder = orderData.filter(order => order.product.sellerCompanyName === companyName )
+        const role = req.session.UserDetails.role
+        if (role === "seller" || role === "admin") {
+            const companyName = req.session.UserDetails.companyName
+            if (!companyName) {
+                return res.send({ success: false, message: "Company name is missing" })
+            }
+            // const orderData = await Order.find().populate({ path: "product", match: { sellerCompanyName: companyName } })
+            // const filterOrder = orderData.filter(order => order.product !== null)
+            const orderData = await Order.find().populate("product")
+            const filterOrder = orderData.filter(order => order.product.sellerCompanyName === companyName)
 
-        if (!orderData) {
-            return res.send({ success: false, message: "There is no orders yet" })
+            if (!orderData) {
+                return res.send({ success: false, message: "There is no orders yet" })
+            }
+            return res.send({ success: true, message: "Company order details fetched successfully", orderDetails: filterOrder }) 
         }
-        return res.send({ success: true, message: "Company order details fetched successfully", orderDetails: filterOrder })
-
+       return res.send({success: false, message: "Access denied"})
+        
     }
     catch (err) {
         console.log("Error in getting particular company orders", err)

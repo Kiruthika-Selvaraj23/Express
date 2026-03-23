@@ -115,6 +115,18 @@ RegisterRouter.post("/login", async (req, res) => {
     }
 })
 
+RegisterRouter.get("/me", async (req, res) => {
+    try {
+        const user = req.session.UserDetails
+        if (!user)
+            return res.send({ success: false, message: "Login and Try again!" })
+        return res.send({ success: true, message: "User Details fetched successfully" , user: user})
+    }
+    catch (err) {
+        console.log("Err in getting user details", err)
+    }
+})
+
 
 RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
     try {
