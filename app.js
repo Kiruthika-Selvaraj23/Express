@@ -24,7 +24,7 @@ mongoose.connect(process.env.MongoDb)
 
 
 app.use(cors({
-    origin: ['http://localhost:3000','https://e-cart-215m.vercel.app'],
+    origin: ['http://localhost:3000','https://e-cart-murex-two.vercel.app'],
     credentials: true
 }))    
 
