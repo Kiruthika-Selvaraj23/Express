@@ -28,19 +28,24 @@ mongoose.connect(process.env.MongoDb)
 app.use(cors({
     origin: ['http://localhost:3000', 'https://e-cart-murex-two.vercel.app'],
     credentials: true
-}))    
+}))
 
 
 const Store = new MongoDbSession({
     uri: process.env.MongoDb,
     collection: "EcartSession"
-}) 
+})
 
 app.use(session({
     secret: process.env.SecretKey,
     resave: false,
     saveUninitialized: false,
     store: Store,
+    cookie: {
+        secure: true,
+        sameSite: "none",
+        httpOnly: true
+    }
 }))
 
 
@@ -48,9 +53,11 @@ app.use(RegisterRouter)
 app.use(ProductRouter)
 app.use(OrderRouter)
 
-// app.listen(port, () => {
-//     console.log("Listening", port)
-// })
+app.set('trust proxy', 1);
+
+app.listen(port, () => {
+    console.log("Listening", port)
+})
 
 app.get("/", (req, res) => {
     res.send("API is running 🚀");
