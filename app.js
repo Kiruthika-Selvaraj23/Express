@@ -43,6 +43,7 @@ app.use(session({
     store: Store,
     cookie: {
         secure: true,
+        httpOnly: true,
         sameSite: "none"
     }
 }))
