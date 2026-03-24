@@ -47,6 +47,8 @@ app.use(RegisterRouter)
 app.use(ProductRouter)
 app.use(OrderRouter)
 
-app.listen(port, () => {
-    console.log("Listening", port)
-})
+// app.listen(port, () => {
+//     console.log("Listening", port)
+// })
+
+module.exports = app;
