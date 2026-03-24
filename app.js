@@ -26,9 +26,10 @@ mongoose.connect(process.env.MongoDb)
 
 
 app.use(cors({
-    origin: 'https://e-cart-murex-two.vercel.app',
+    origin: ['http://localhost:3000','https://e-cart-murex-two.vercel.app'],
     credentials: true
 }))    
+
 
 const Store = new MongoDbSession({
     uri: process.env.MongoDb,
@@ -54,5 +55,9 @@ app.use(OrderRouter)
 // app.listen(port, () => {
 //     console.log("Listening", port)
 // })
+
+app.get("/", (req, res) => {
+    res.send("API is running 🚀");
+});
 
 module.exports = app;
