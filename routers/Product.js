@@ -8,19 +8,36 @@ const fs = require("fs")
 
 const isAuth = require("../middleware/Auth")
 
-const upload = "upload"
-if (!fs.existsSync(upload)) {
-    fs.mkdirSync(upload)
+// const upload = "upload"
+// if (!fs.existsSync(upload)) {
+//     fs.mkdirSync(upload)
+// }
+
+// const storage = multer.diskStorage({
+//     destination: (req, file, cb) => {
+//         cb(null, upload)
+//     },
+//     filename: (req, file, cb) => {
+//         cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
+//     }
+// })
+
+const uploadDir = path.join("/tmp", "upload");
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+
+// 2️⃣ Configure Multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, upload)
+        cb(null, uploadDir);
     },
     filename: (req, file, cb) => {
-        cb(null, file.fieldname + "-" + Date.now() + path.extname(file.originalname))
-    }
-})
+        const uniqueName = file.fieldname + "-" + Date.now() + path.extname(file.originalname);
+        cb(null, uniqueName);
+    },
+});
 
 const uploadFile = multer({
     storage: storage,

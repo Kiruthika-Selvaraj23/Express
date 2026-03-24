@@ -16,7 +16,9 @@ console.log("app is running")
 app.use(express.json())
 
 app.use(express.urlencoded({ extended: true }))
-app.use("/upload", express.static("upload"))
+// app.use("/upload", express.static("upload"))
+app.use("/upload", express.static("/tmp/upload"))
+
 
 mongoose.connect(process.env.MongoDb)
     .then(() => console.log("MongoDb connected successfully"))
