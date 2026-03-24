@@ -26,7 +26,9 @@ mongoose.connect(process.env.MongoDb)
 
 
 app.use(cors({
-    origin: ['http://localhost:3000','https://e-cart-murex-two.vercel.app'],
+    origin: ['http://localhost:3000', 'https://e-cart-murex-two.vercel.app'],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type"],
     credentials: true
 }))    
 
@@ -43,7 +45,6 @@ app.use(session({
     store: Store,
     cookie: {
         secure: true,
-        httpOnly: true,
         sameSite: "none"
     }
 }))
