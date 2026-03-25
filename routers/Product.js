@@ -44,7 +44,7 @@ const uploadFile = multer({
     limits: 5*1024*1024
 })
 
-ProductRouter.get("/getProducts", async (req, res) => {
+ProductRouter.get("/api/getProducts", async (req, res) => {
     try {
         const productsData = await Product.find()
         if (!productsData) {
@@ -57,7 +57,7 @@ ProductRouter.get("/getProducts", async (req, res) => {
     }
 })
 
-ProductRouter.get("/getProductDetails/:id", async (req, res) => {
+ProductRouter.get("/api/getProductDetails/:id", async (req, res) => {
     try {
         const id = req.params.id
         if (!id) {
@@ -74,7 +74,7 @@ ProductRouter.get("/getProductDetails/:id", async (req, res) => {
     }
 })
 
-ProductRouter.get("/getCompanyProducts", isAuth, async (req, res) => {
+ProductRouter.get("/api/getCompanyProducts", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role 
         if (role === "admin" || role === "seller") {
@@ -95,7 +95,7 @@ ProductRouter.get("/getCompanyProducts", isAuth, async (req, res) => {
     }
 })
 
-ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req, res) => {
+ProductRouter.post("/api/product", isAuth , uploadFile.single("product") ,async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller"){
@@ -147,7 +147,7 @@ ProductRouter.post("/product", isAuth , uploadFile.single("product") ,async (req
     }
 })
 
-ProductRouter.put("/updateProduct/:id", isAuth, uploadFile.single("product"),async (req, res) => {
+ProductRouter.put("/api/updateProduct/:id", isAuth, uploadFile.single("product"),async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller") {
@@ -194,7 +194,7 @@ ProductRouter.put("/updateProduct/:id", isAuth, uploadFile.single("product"),asy
     }
 })
 
-ProductRouter.delete("/deleteProduct/:id", isAuth, async (req, res) => {
+ProductRouter.delete("/api/deleteProduct/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin" || role === "seller") {

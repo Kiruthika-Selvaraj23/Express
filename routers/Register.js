@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer')
 const Register = require("../models/Register")
 const isAuth = require("../middleware/Auth")
 
-RegisterRouter.get("/getUsers", async (req, res) => {
+RegisterRouter.get("/api/getUsers", async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -22,7 +22,7 @@ RegisterRouter.get("/getUsers", async (req, res) => {
     }
 })
 
-RegisterRouter.post("/enroll", async (req, res) => {
+RegisterRouter.post("/api/enroll", async (req, res) => {
     try {
         const { userName, pwd, emailId, mobileNo, role, companyName } = req.body
         if (!userName || !pwd || !emailId || !mobileNo) {
@@ -57,7 +57,7 @@ RegisterRouter.post("/enroll", async (req, res) => {
     }
 })
 
-RegisterRouter.post("/login", async (req, res) => {
+RegisterRouter.post("/api/login", async (req, res) => {
     try {
         const { userMailId, pwd } = req.body
         if (!userMailId || !pwd) {
@@ -115,7 +115,7 @@ RegisterRouter.post("/login", async (req, res) => {
     }
 })
 
-RegisterRouter.get("/me", async (req, res) => {
+RegisterRouter.get("/api/me", async (req, res) => {
     try {
         const user = req.session.UserDetails
         if (!user)
@@ -128,7 +128,7 @@ RegisterRouter.get("/me", async (req, res) => {
 })
 
 
-RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
+RegisterRouter.put("/api/updateUser/:id", isAuth, async (req, res) => {
     try {
         const id = req.params.id
         if (!id) {
@@ -158,7 +158,7 @@ RegisterRouter.put("/updateUser/:id", isAuth, async (req, res) => {
     }
 })
 
-RegisterRouter.delete("/deleteUser/:id", isAuth, async (req, res) => {
+RegisterRouter.delete("/api/deleteUser/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -181,7 +181,7 @@ RegisterRouter.delete("/deleteUser/:id", isAuth, async (req, res) => {
     }
 })
 
-RegisterRouter.delete("/logout", isAuth, async (req, res) => {
+RegisterRouter.delete("/api/logout", isAuth, async (req, res) => {
     try {
         if (!req.session.UserDetails) {
             return res.send({ success: false, message: "Login and Try again" })

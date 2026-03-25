@@ -5,7 +5,7 @@ const OrderRouter = express.Router()
 
 const isAuth = require("../middleware/Auth")
 
-OrderRouter.get("/getOrders", isAuth, async (req, res) => {
+OrderRouter.get("/api/getOrders", isAuth, async (req, res) => {
     try {
         const orderData = await Order.find().populate("product")
         if (!orderData) {
@@ -18,7 +18,7 @@ OrderRouter.get("/getOrders", isAuth, async (req, res) => {
     }
 })
 
-OrderRouter.get("/getParticularCompanyOrders", isAuth, async (req, res) => {
+OrderRouter.get("/api/getParticularCompanyOrders", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "seller" || role === "admin") {
@@ -44,7 +44,7 @@ OrderRouter.get("/getParticularCompanyOrders", isAuth, async (req, res) => {
     }
 })
 
-OrderRouter.get("/getParticularUserOrder", isAuth, async (req, res) => {
+OrderRouter.get("/api/getParticularUserOrder", isAuth, async (req, res) => {
     try {
         const emailId = req.session.UserDetails.emailId
         if (!emailId) {
@@ -62,7 +62,7 @@ OrderRouter.get("/getParticularUserOrder", isAuth, async (req, res) => {
 })
 
 
-OrderRouter.post("/order", isAuth, async (req, res) => {
+OrderRouter.post("/api/order", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "user") {
@@ -108,7 +108,7 @@ OrderRouter.post("/order", isAuth, async (req, res) => {
     }
 })
 
-OrderRouter.put("/updateOrder/:id", isAuth, async (req, res) => {
+OrderRouter.put("/api/updateOrder/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
@@ -149,7 +149,7 @@ OrderRouter.put("/updateOrder/:id", isAuth, async (req, res) => {
     }
 })
 
-OrderRouter.delete("/deleteOrder/:id", isAuth, async (req, res) => {
+OrderRouter.delete("/api/deleteOrder/:id", isAuth, async (req, res) => {
     try {
         const role = req.session.UserDetails.role
         if (role === "admin") {
