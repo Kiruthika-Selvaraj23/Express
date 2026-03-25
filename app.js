@@ -18,8 +18,8 @@ app.set('trust proxy', 1);
 
 
 app.use(express.urlencoded({ extended: true }))
-// app.use("/upload", express.static("upload"))
-app.use("/upload", express.static("/tmp/upload"))
+app.use("/upload", express.static("upload"))
+// app.use("/upload", express.static("/tmp/upload"))
 
 
 mongoose.connect(process.env.MongoDb)
