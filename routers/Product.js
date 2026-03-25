@@ -46,11 +46,15 @@ const uploadFile = multer({
 
 ProductRouter.get("/api/getProducts", async (req, res) => {
     try {
-        const productsData = await Product.find()
-        if (!productsData) {
-            return res.send({ success: true, message: "There is no products" })
+        const role = req.session.UserDetails.role
+        if (role === "admin" || role === "seller" || role === "user") {
+            const productsData = await Product.find()
+            if (!productsData) {
+                return res.send({ success: true, message: "There is no products" })
+            }
+            return res.send({ success: true, message: "Products Data fetched successfully", productDetails: productsData })
+
         }
-        return res.send({ success: true, message: "Products Data fetched successfully", productDetails: productsData })
     }
     catch (err) {
         console.log("Error in getting products", err)
