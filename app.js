@@ -14,6 +14,8 @@ const port = process.env.PORT
 console.log("app is running")
 
 app.use(express.json())
+app.set('trust proxy', 1);
+
 
 app.use(express.urlencoded({ extended: true }))
 // app.use("/upload", express.static("upload"))
@@ -53,14 +55,10 @@ app.use(RegisterRouter)
 app.use(ProductRouter)
 app.use(OrderRouter)
 
-app.set('trust proxy', 1);
 
 app.listen(port, () => {
     console.log("Listening", port)
 })
 
-app.get("/", (req, res) => {
-    res.send("API is running 🚀");
-});
 
 module.exports = app;
